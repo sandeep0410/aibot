@@ -1,6 +1,5 @@
 package com.app.intellichat.ui
 
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,48 +14,43 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.app.intellichat.ChatViewModel
+import com.app.intellichat.ChatViewModelFactory
 import com.app.intellichat.Repository
-import com.app.intellichat.ui.components.MessageBubble
-import com.app.intellichat.ui.components.TypingIndicator
 
 @Composable
-fun ChatScreen(repository: Repository) {
-    var messages by remember { mutableStateOf(listOf("Hello! How can I assist you today?")) }
-    var inputText by remember { mutableStateOf(TextFieldValue("")) }
-    var isTyping by remember { mutableStateOf(false) }
+fun ChatScreen(viewModel: ChatViewModel = viewModel(factory = ChatViewModelFactory(Repository()))) {
+    val messages = viewModel.messages
+    val isTyping = viewModel.isTyping
+    var inputText by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        // Chat messages
+        // Display chat messages
         Column(modifier = Modifier.weight(1f)) {
             messages.forEach { message ->
-                MessageBubble(message)
+                Text(message)
             }
             if (isTyping) {
-                TypingIndicator()
+                Text("Typing...")
             }
         }
 
-        // Input field
+        // Input field and send button
         Row(modifier = Modifier.fillMaxWidth()) {
             BasicTextField(
                 value = inputText,
                 onValueChange = { inputText = it },
                 modifier = Modifier.weight(1f).padding(8.dp)
             )
-            Button(onClick = {
-                val userMessage = inputText.text
-                messages = messages + userMessage
-                inputText = TextFieldValue("")
-                isTyping = true
-
-                // Fetch response from API
-                repository.getChatResponse(userMessage) { response ->
-                    messages = messages + response
-                    isTyping = false
-                }
-            }) {
+            Button(
+                onClick = {
+                    viewModel.sendMessage(inputText)
+                    inputText = "" // Clear input field
+                },
+                enabled = inputText.isNotEmpty() // Enable button only if input is not empty
+            ) {
                 Text("Send")
             }
         }

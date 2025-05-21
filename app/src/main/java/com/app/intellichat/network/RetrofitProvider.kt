@@ -1,6 +1,5 @@
-package com.app.intellichat
+package com.app.intellichat.network
 
-import com.app.intellichat.network.ApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

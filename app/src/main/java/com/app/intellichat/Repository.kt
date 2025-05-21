@@ -2,33 +2,15 @@ package com.app.intellichat
 
 import com.app.intellichat.network.ApiService
 import com.app.intellichat.network.ChatRequest
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.app.intellichat.network.RetrofitProvider
 
-class Repository {
-    private val apiService: ApiService
-
-    init {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.openai.com/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        apiService = retrofit.create(ApiService::class.java)
-    }
-
-    fun getChatResponse(prompt: String, callback: (String) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response = apiService.getChatCompletion(ChatRequest(prompt = prompt))
-                val reply = response.choices.firstOrNull()?.text ?: "No response"
-                callback(reply)
-            } catch (e: Exception) {
-                callback("Error: ${e.message}")
-            }
+class Repository(private val apiService: ApiService = RetrofitProvider.apiService) {
+    suspend fun getChatResponse(prompt: String): String {
+        return try {
+            val response = apiService.getChatCompletion(ChatRequest(prompt = prompt))
+            response.choices.firstOrNull()?.text ?: "No response"
+        } catch (e: Exception) {
+            "Error: ${e.message}"
         }
     }
 }
