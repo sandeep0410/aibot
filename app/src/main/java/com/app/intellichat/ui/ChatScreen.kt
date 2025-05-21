@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -19,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.app.intellichat.ChatViewModel
 import com.app.intellichat.ChatViewModelFactory
 import com.app.intellichat.Repository
+import com.app.intellichat.ui.components.MessageBubble
 
 @Composable
 fun ChatScreen(viewModel: ChatViewModel = viewModel(factory = ChatViewModelFactory(Repository()))) {
@@ -28,12 +31,14 @@ fun ChatScreen(viewModel: ChatViewModel = viewModel(factory = ChatViewModelFacto
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         // Display chat messages
-        Column(modifier = Modifier.weight(1f)) {
-            messages.forEach { message ->
-                Text(message)
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(messages) { message ->
+                MessageBubble(message = message, isUser = message.startsWith("You:"))
             }
             if (isTyping) {
-                Text("Typing...")
+                item {
+                    Text("Typing...")
+                }
             }
         }
 
